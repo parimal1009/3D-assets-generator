@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced 3D Model Generation ML Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .input-section, .output-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .input-section h2, .output-section h2 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+        }
+
+        .result-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .result-info h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+
+        .result-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .preview-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .download-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .download-btn {
+            flex: 1;
+            padding: 12px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        .examples-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .examples-section h2 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .example-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .example-item:hover {
+            background: #e9ecef;
+            border-color: #2a5298;
+            transform: translateY(-2px);
+        }
+
+        .status-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .status-section h2 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .status-item h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+
+        .status-item .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .enhanced-prompt {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .enhanced-prompt h4 {
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .enhanced-prompt p {
+            color: #555;
+            font-style: italic;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .download-section {
+                flex-direction: column;
+            }
+            
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-tag {
+            display: inline-block;
+            background: #2a5298;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2a5298;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎯 Advanced 3D Model Generator</h1>
+            <p>AI-Powered 3D Asset Creation with LangChain, Groq & Hugging Face</p>
+        </header>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2>🚀 Generate 3D Model</h2>
+                <form id="generateForm">
+                    <div class="form-group">
+                        <label for="prompt">Describe your 3D model:</label>
+                        <textarea 
+                            id="prompt" 
+                            name="prompt" 
+                            rows="4" 
+                            placeholder="Enter a detailed description of the 3D model you want to generate..."
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="format">Output Format:</label>
+                        <select id="format" name="format">
+                            <option value="glb">GLB (Binary)</option>
+                            <option value="obj">OBJ (Text)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="generate-btn" id="generateBtn">
+                        Generate 3D Model
+                    </button>
+                </form>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Generating your 3D model...</p>
+                    <p><small>This may take 30-60 seconds</small></p>
+                </div>
+
+                <div class="error" id="error">
+                    <strong>Error:</strong> <span id="errorMessage"></span>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2>📦 Generated Model</h2>
+                
+                <div class="result" id="result">
+                    <div class="result-info">
+                        <h3>Generation Complete!</h3>
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <div class="stat-value" id="generationTime">0s</div>
+                                <div class="stat-label">Generation Time</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="vertexCount">0</div>
+                                <div class="stat-label">Vertices</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="faceCount">0</div>
+                                <div class="stat-label">Faces</div>
+                            </div>
+                        </div>
+                        
+                        <div class="enhanced-prompt" id="enhancedPromptContainer" style="display: none;">
+                            <h4>🧠 AI-Enhanced Description:</h4>
+                            <p id="enhancedPrompt"></p>
+                        </div>
+                    </div>
+
+                    <div class="preview-container" id="previewContainer" style="display: none;">
+                        <h3>Preview:</h3>
+                        <img id="previewImage" class="preview-image" alt="3D Model Preview" />
+                    </div>
+
+                    <div class="download-section">
+                        <a href="#" class="download-btn" id="downloadBtn" download>
+                            📥 Download Model
+                        </a>
+                    </div>
+                </div>
+
+                <div id="placeholder" style="text-align: center; color: #666; padding: 40px;">
+                    <p>Your generated 3D model will appear here</p>
+                    <p><small>Try one of the example prompts below to get started!</small></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="examples-section">
+            <h2>💡 Example Prompts</h2>
+            <div class="examples-grid" id="examplesGrid">
+                <!-- Examples will be loaded here -->
+            </div>
+        </div>
+
+        <div class="status-section">
+            <h2>⚡ System Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <h3>Model Status</h3>
+                    <div class="value" id="modelStatus">Loading...</div>
+                </div>
+                <div class="status-item">
+                    <h3>Device</h3>
+                    <div class="value" id="device">-</div>
+                </div>
+                <div class="status-item">
+                    <h3>Total Generations</h3>
+                    <div class="value" id="totalGenerations">0</div>
+                </div>
+                <div class="status-item">
+                    <h3>Version</h3>
+                    <div class="value" id="version">1.0.0</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h3>🚀 Features:</h3>
+                <div id="features" style="margin-top: 10px;">
+                    <!-- Features will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentModelUrl = null;
+
+        // DOM elements
+        const generateForm = document.getElementById('generateForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const placeholder = document.getElementById('placeholder');
+        const error = document.getElementById('error');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatus();
+            loadExamples();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Form submission
+            generateForm.addEventListener('submit', handleGenerate);
+            
+            // Auto-refresh status every 30 seconds
+            setInterval(loadStatus, 30000);
+        }
+
+        async function handleGenerate(e) {
+            e.preventDefault();
+            
+            const prompt = document.getElementById('prompt').value.trim();
+            const format = document.getElementById('format').value;
+            
+            if (!prompt) {
+                showError('Please enter a prompt');
+                return;
+            }
+
+            // Show loading state
+            generateBtn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            placeholder.style.display = 'none';
+            error.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate3d', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt, format })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail?.error || errorData.detail || 'Generation failed');
+                }
+
+                const data = await response.json();
+                displayResult(data);
+                loadStatus(); // Refresh status
+                
+            } catch (err) {
+                showError('Error: ' + err.message);
+            } finally {
+                generateBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayResult(data) {
+            // Update statistics
+            document.getElementById('generationTime').textContent = data.generation_time + 's';
+            document.getElementById('vertexCount').textContent = data.vertices.toLocaleString();
+            document.getElementById('faceCount').textContent = data.faces.toLocaleString();
+
+            // Show enhanced prompt if available
+            if (data.enhanced_prompt) {
+                document.getElementById('enhancedPrompt').textContent = data.enhanced_prompt;
+                document.getElementById('enhancedPromptContainer').style.display = 'block';
+            }
+
+            // Show preview if available
+            if (data.preview_image) {
+                document.getElementById('previewImage').src = 'data:image/png;base64,' + data.preview_image;
+                document.getElementById('previewContainer').style.display = 'block';
+            }
+
+            // Set download link
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.href = data.file_url;
+            downloadBtn.textContent = `📥 Download ${data.format.toUpperCase()} Model`;
+            currentModelUrl = data.file_url;
+
+            // Show result
+            result.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            error.style.display = 'block';
+            result.style.display = 'none';
+            placeholder.style.display = 'block';
+        }
+
+        async function loadStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                // Update status display
+                document.getElementById('modelStatus').textContent = 
+                    data.model_loaded ? '✅ Ready' : '❌ Error';
+                document.getElementById('device').textContent = data.device.toUpperCase();
+                document.getElementById('totalGenerations').textContent = data.total_generations;
+                document.getElementById('version').textContent = data.version;
+
+                // Update features
+                const featuresContainer = document.getElementById('features');
+                featuresContainer.innerHTML = '';
+                data.features.forEach(feature => {
+                    const tag = document.createElement('span');
+                    tag.className = 'feature-tag';
+                    tag.textContent = feature;
+                    featuresContainer.appendChild(tag);
+                });
+
+            } catch (err) {
+                console.error('Failed to load status:', err);
+            }
+        }
+
+        async function loadExamples() {
+            try {
+                const response = await fetch('/api/examples');
+                const data = await response.json();
+
+                const examplesGrid = document.getElementById('examplesGrid');
+                examplesGrid.innerHTML = '';
+
+                data.examples.forEach(example => {
+                    const item = document.createElement('div');
+                    item.className = 'example-item';
+                    item.textContent = example;
+                    item.addEventListener('click', () => {
+                        document.getElementById('prompt').value = example;
+                        // Smooth scroll to form
+                        document.getElementById('prompt').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                        document.getElementById('prompt').focus();
+                    });
+                    examplesGrid.appendChild(item);
+                });
+            } catch (err) {
+                console.error('Failed to load examples:', err);
+            }
+        }
+
+        // Utility functions
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        function formatTime(seconds) {
+            if (seconds < 60) {
+                return seconds.toFixed(1) + 's';
+            } else {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}m ${remainingSeconds.toFixed(1)}s`;
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to generate
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                if (!generateBtn.disabled) {
+                    handleGenerate(e);
+                }
+            }
+        });
+
+        // Auto-save prompt to localStorage (with fallback)
+        const promptTextarea = document.getElementById('prompt');
+        let promptSaveTimeout;
+
+        promptTextarea.addEventListener('input', function() {
+            clearTimeout(promptSaveTimeout);
+            promptSaveTimeout = setTimeout(() => {
+                try {
+                    // Don't use localStorage as per instructions, just keep in memory
+                    window.lastPrompt = this.value;
+                } catch (e) {
+                    // Silently ignore localStorage errors
+                }
+            }, 500);
+        });
+
+        // Restore last prompt on page load
+        window.addEventListener('load', function() {
+            try {
+                if (window.lastPrompt) {
+                    document.getElementById('prompt').value = window.lastPrompt;
+                }
+            } catch (e) {
+                // Silently ignore
+            }
+        });
+
+        // Add some visual feedback for form interactions
+        const formInputs = document.querySelectorAll('input, textarea, select');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.02)';
+                this.style.transition = 'transform 0.2s';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add loading animation to generate button
+        function updateGenerateButton(loading = false) {
+            const btn = document.getElementById('generateBtn');
+            if (loading) {
+                btn.innerHTML = '⏳ Generating...';
+                btn.style.background = 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)';
+            } else {
+                btn.innerHTML = 'Generate 3D Model';
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
+        }
+
+        // Update the handle generate function to use the new button animation
+        const originalHandleGenerate = handleGenerate;
+        handleGenerate = async function(e) {
+            updateGenerateButton(true);
+            try {
+                await originalHandleGenerate(e);
+            } finally {
+                updateGenerateButton(false);
+            }
+        };
+
+        // Add download progress tracking
+        function trackDownload(url) {
+            // Simple download tracking
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Enhanced error handling with retry capability
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        async function handleGenerateWithRetry(e) {
+            try {
+                await handleGenerate(e);
+                retryCount = 0; // Reset on success
+            } catch (error) {
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    setTimeout(() => {
+                        console.log(`Retry attempt ${retryCount}/${maxRetries}`);
+                        handleGenerateWithRetry(e);
+                    }, 2000 * retryCount); // Exponential backoff
+                } else {
+                    showError(`Failed after ${maxRetries} attempts: ${error.message}`);
+                    retryCount = 0;
+                }
+            }
+        }
+
+        console.log('🎯 Advanced 3D Model Generator initialized successfully!');
+        console.log('💡 Press Ctrl+Enter (or Cmd+Enter) to generate quickly');
+        console.log('🚀 Ready for 3D model generation with AI enhancement');
+    </script>
+</body>
+</html>
