@@ -35,13 +35,13 @@ Ultra-Fast 3D Model Generator is a cutting-edge AI-powered application that crea
 <div align="center">
 
 ### Sample 3D Asset 1
-![Sample 1](https://github.com/parimal1009/3D-assets-generator/blob/main/images/Screenshot%202025-07-27%20123003.png?raw=true)
+![Sample 1](https://github.com/parimal1009/3D-assets-generator/blob/main/images/Screenshot%202025-07-31%20213405.png?raw=true)
 
 ### Sample 3D Asset 2
 ![Sample 2](https://github.com/parimal1009/3D-assets-generator/blob/main/images/Screenshot%202025-07-27%20123720.png?raw=true)
 
 ### Sample 3D Asset 3
-![Sample 3](https://github.com/parimal1009/3D-assets-generator/blob/main/images/Screenshot%202025-07-27%20122541.png?raw=true)
+![Sample 3](https://github.com/parimal1009/3D-assets-generator/blob/main/images/Screenshot%202025-07-31%20213208.png?raw=true)
 
 </div>
 
